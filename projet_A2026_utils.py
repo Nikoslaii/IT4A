@@ -50,6 +50,25 @@ def load_real_graph(name):
     Returns:
         Le graphe et la partition de référence si elle est disponible.
     """
+
+    Ground_truth = {}
+    G = nx.DiGraph() if directed else nx.Graph()
+
+    with open(f"db/{name}", "r") as f:
+        edges = [tuple(map(int, line.strip().split())) for line in f.readlines()]
+
+    G.add_edges_from(edges)
+
+    with open(f"db/{name}", "r") as f:
+        for line in f.readlines():
+            parts = line.strip().split()
+            node_id = int(parts[0])
+            label = parts[-1]
+            Ground_truth[node_id] = label
+
+
+    return G, Ground_truth
+
     raise NotImplementedError
 
 def load_cora(directed=False):
@@ -65,7 +84,24 @@ def load_cora(directed=False):
         (G, ground_truth) : graphe NetworkX et dictionnaire
         {sommet: étiquette de classe}
     """
-    raise NotImplementedError
+
+    Ground_truth = {}
+    G = nx.DiGraph() if directed else nx.Graph()
+
+    with open("cora/cora.cites", "r") as f:
+        edges = [tuple(map(int, line.strip().split())) for line in f.readlines()]
+
+    G.add_edges_from(edges)
+
+    with open("cora/cora.content", "r") as f:
+        for line in f.readlines():
+            parts = line.strip().split()
+            node_id = int(parts[0])
+            label = parts[-1]
+            Ground_truth[node_id] = label
+
+
+    return G, Ground_truth
 
 def girvan_newman_communities(G, n_communities=None):
     """Détection de communautés par Girvan-Newman.
@@ -119,7 +155,7 @@ def louvain_communities(G, resolution=1.0):
 
     aide https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.community.louvain.louvain_communities.html#networkx.algorithms.community.louvain.louvain_communities
     """
-
+    
     return nx.community.louvain_communities(G[0], resolution=resolution) #renvoie la partition de communautés trouvée par l'algorithme de Louvain avec le graphe donné et le paramètre de résolution donné, en utilisant la fonction louvain_communities de NetworkX
 
 
