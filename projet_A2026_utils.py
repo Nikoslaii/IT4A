@@ -129,6 +129,7 @@ def girvan_newman_communities(G, n_communities=None):
     
     comp = nx.community.girvan_newman(graph) #instancie un générateur de partitions de communautés avec l'algorithme de Girvan-Newman
 
+
     #parcours les partitions de communautés générées par l'algorithme de Girvan-Newman, jusqu'à n_communities-1 si is_n_communities est True, sinon jusqu'à la fin du générateur
     for communities in itertools.islice(comp, n_communities-1 if is_n_communities else None): #stoppe l'itération si on a atteint le nombre de communautés visé (is_n_communities True) ou si on a épuisé le générateur (is_n_communities False)
         modularity_current = nx.community.modularity(graph, communities) #calcule la modularité de la partition actuelle
@@ -139,6 +140,10 @@ def girvan_newman_communities(G, n_communities=None):
             if modularity_current > best_modularity:
                 best_modularity = modularity_current
                 best_partition = tuple(sorted(c) for c in communities)
+
+            else:
+                break #si la modularité actuelle est inférieure à la meilleure modularité trouvée, on arrête l'itération, car les partitions suivantes auront une modularité encore plus faible
+
 
 
     return best_partition
@@ -259,4 +264,16 @@ def benchmark_communities(G, algorithm, repeats=5):
     Returns:
         Un couple (temps moyen, modularité moyenne).
     """
+
+    Q = 0
+    t0 = time.time()
+
+    for _ in range(repeats):    
+        # Détection avec l'algorithme donné
+        com = algorithm(G)
+        Q += modularity(G, com)
+
+
+    return (time.time() - t0) / repeats, Q / repeats
+
     raise NotImplementedError
