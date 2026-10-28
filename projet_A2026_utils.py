@@ -1,4 +1,5 @@
 from collections import Counter
+from itertools import takewhile
 
 from cdlib import algorithms
 import numpy as np
@@ -52,7 +53,7 @@ def load_real_graph(name):
     """
 
     Ground_truth = {}
-    G = nx.DiGraph() if directed else nx.Graph()
+    G = nx.DiGraph()
 
     with open(f"db/{name}", "r") as f:
         edges = [tuple(map(int, line.strip().split())) for line in f.readlines()]
@@ -115,6 +116,8 @@ def girvan_newman_communities(G, n_communities=None):
         Liste de listes de sommets.
 
     aide https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.community.centrality.girvan_newman.html#networkx.algorithms.community.centrality.girvan_newman
+    
+    puis https://stackoverflow.com/questions/62951320/why-is-the-girvan-newman-algorithm-in-networkx-so-slow
     """
     import itertools
 
@@ -129,7 +132,7 @@ def girvan_newman_communities(G, n_communities=None):
     
     comp = nx.community.girvan_newman(graph) #instancie un générateur de partitions de communautés avec l'algorithme de Girvan-Newman
 
-
+    """
     #parcours les partitions de communautés générées par l'algorithme de Girvan-Newman, jusqu'à n_communities-1 si is_n_communities est True, sinon jusqu'à la fin du générateur
     for communities in itertools.islice(comp, n_communities-1 if is_n_communities else None): #stoppe l'itération si on a atteint le nombre de communautés visé (is_n_communities True) ou si on a épuisé le générateur (is_n_communities False)
         modularity_current = nx.community.modularity(graph, communities) #calcule la modularité de la partition actuelle
@@ -142,10 +145,29 @@ def girvan_newman_communities(G, n_communities=None):
                 best_partition = tuple(sorted(c) for c in communities)
 
             else:
-                break #si la modularité actuelle est inférieure à la meilleure modularité trouvée, on arrête l'itération, car les partitions suivantes auront une modularité encore plus faible
+                print(f"Modularité actuelle : {modularity_current:.4f}, meilleure modularité : {best_modularity:.4f} fini")
+                return best_partition #si la modularité actuelle est inférieure à la meilleure modularité trouvée, on arrête l'itération, car les partitions suivantes auront une modularité encore plus faible
+    """
 
 
+    
+    if is_n_communities:
+        limited = takewhile(lambda c: len(c) <= n_communities, comp)
+        for communities in limited:
+            best_partition = tuple(sorted(c) for c in communities)
 
+    else:
+
+        limited = takewhile(lambda c: nx.community.modularity(graph, c) > best_modularity, comp)
+        for communities in limited:
+            modularity_current = nx.community.modularity(graph, communities)
+            if modularity_current > best_modularity:
+                best_modularity = modularity_current
+                best_partition = tuple(sorted(c) for c in communities)
+
+            if len(best_partition) >= np.sqrt(G[0].number_of_nodes())//1 + 1:
+                break
+            
     return best_partition
 
 def louvain_communities(G, resolution=1.0):
