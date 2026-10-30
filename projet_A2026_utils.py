@@ -70,8 +70,6 @@ def load_real_graph(name):
 
     return G, Ground_truth
 
-    raise NotImplementedError
-
 def load_cora(directed=False):
     """Charge le jeu de données Cora.
 
@@ -119,7 +117,6 @@ def girvan_newman_communities(G, n_communities=None):
     
     puis https://stackoverflow.com/questions/62951320/why-is-the-girvan-newman-algorithm-in-networkx-so-slow
     """
-    import itertools
 
 
     graph=G[0].copy()   # Copie du graphe pour ne pas le modifier
@@ -301,5 +298,3 @@ def benchmark_communities(G, algorithm, repeats=5):
 
 
     return (time.time() - t0) / repeats, Q / repeats
-
-    raise NotImplementedError
