@@ -198,40 +198,42 @@ def label_propagation_communities(G, max_iter=100):
     Returns:
         Liste de listes de sommets.
 
-    aide AI for now need rework
+    aide AI
     """
-        # Initialize each node with its own unique label
+        # initialisation des labels de chaque noeud avec son propre index
     labels = {node: i for i, node in enumerate(G[0].nodes())}
     nodes = list(G[0].nodes())
     
-    for iteration in range(max_iter):
+    for _ in range(max_iter):
         labels_changed = False
-        # Shuffle nodes to mimic asynchronous updates
+        # mélange aléatoire des noeuds pour éviter les biais d'ordre
         random.shuffle(nodes)
         
         for node in nodes:
+            # Récupère les voisins du noeud actuel
             neighbors = list(G[0].neighbors(node))
             if not neighbors:
                 continue
                 
-            # Count the frequency of neighbor labels
+            # compte les labels des voisins et trouve le label le plus fréquent
             neighbor_labels = [labels[nbr] for nbr in neighbors]
             top_label, top_count = Counter(neighbor_labels).most_common(1)[0]
             
-            # If current label is not the most frequent, update it
+            # si le label le plus fréquent est différent du label actuel, on met à jour le label et on note qu'il y a eu un changement
             if labels[node] != top_label:
                 labels[node] = top_label
                 labels_changed = True
                 
-        # Early exit if the communities converge before reaching max_iter
+        # si aucun label n'a changé lors de cette itération, on peut arrêter l'algorithme
         if not labels_changed:
             break
             
-    # Group nodes by their final labels
+    # cree un dictionnaire de communautés à partir des labels finaux
     communities = {}
     for node, label in labels.items():
         communities.setdefault(label, set()).add(node)
-        
+
+    # renvoie la liste des communautés sous forme de listes de sommets
     return list(communities.values())    
 
 
