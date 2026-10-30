@@ -271,6 +271,8 @@ def plot_communities(G, communities, title="", with_labels=False):
     graph = G[0]
 
     #fais avec les liste de sommets de chaque communauté un graphe avec les sommets de chaque communauté et les arêtes entre eux, en utilisant la fonction subgraph de NetworkX et en leur donnant une couleur par comunauté avec rajoute sur chaque points le numéro du sommet avec la fonction draw_networkx_labels de NetworkX
+    
+    
     nx.draw(graph, pos=nx.spring_layout(graph), node_color=[i for i, c in enumerate(communities) for _ in c], with_labels=with_labels)
     plt.title(title)
     plt.show() 
